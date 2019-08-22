@@ -58,3 +58,28 @@
 	```
 	restart sshd
 5.
+	install ufw
+	```
+	sudo apt-get install ufw
+	```
+	status firewall
+	```
+	sudo ufw status
+	```
+	enable ufw and configurate
+	```
+	sudo ufw enable
+	sudo ufw allow 80/tcp	# rule for http
+	sudo ufw allow 443		# rule for https
+	sudo ufw allow NNNNN	# rule for custom ssh port
+	sudo ufw status			# check
+	```
+	if need to configurate icmp, dhcp client, brdcast
+	```
+	sudo vim /etc/ufw/before.rules
+	# and comment the right part
+	```
+	apply changes
+	```
+	sudo ufw reload
+	```
