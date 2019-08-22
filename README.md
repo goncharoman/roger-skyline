@@ -117,3 +117,5 @@
 	```
 	sudo service fail2ban restart
 	```
+	!notes
+	https://github.com/fail2ban/fail2ban/issues/1092
