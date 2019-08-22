@@ -74,6 +74,9 @@
 	sudo ufw allow NNNNN	# rule for custom ssh port
 	sudo ufw status			# check
 	```
+	allow 80 and 443 ports if use web server
+
+
 	if need to configurate icmp, dhcp client, brdcast
 	```
 	sudo vim /etc/ufw/before.rules
@@ -82,4 +85,30 @@
 	apply changes
 	```
 	sudo ufw reload
+	```
+6.
+	fail2ban
+	
+	installation
+	```
+	sudo apt-get install fail2ban
+	```
+	user settings are best stored in .local file (not .conf)
+	```
+	sudo vim /etc/fail2ban/jail.local
+	```  
+	```
+	#in jail.local
+	
+	[DEFAULT]
+	ignoreip = 127.0.0.1
+	bantime = 600
+
+	[sshd]
+	enabled = true
+	port = 52121, ssh
+	filter = sshd
+	logpath = %(sshd_log)s
+	backend = %(sshd_backend)s
+	maxretry = 3
 	```
