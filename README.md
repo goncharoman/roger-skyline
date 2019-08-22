@@ -107,8 +107,13 @@
 	[sshd]
 	enabled = true
 	port = 52121, ssh
+	action = iptables[name=SSH, port=52121, protocol=tcp]
 	filter = sshd
 	logpath = %(sshd_log)s
 	backend = %(sshd_backend)s
 	maxretry = 3
+	```
+	restart daemon
+	```
+	sudo service fail2ban restart
 	```
