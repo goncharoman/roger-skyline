@@ -119,3 +119,7 @@
 	```
 	!notes
 	https://github.com/fail2ban/fail2ban/issues/1092
+
+
+
+	ansible vault passwd - q1234

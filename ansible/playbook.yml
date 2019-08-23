@@ -1,0 +1,17 @@
+---
+  - name: Test connection
+    hosts: VMS
+    
+    tasks:
+
+    - name: Ping
+      ping:
+
+    - name: Read file in /hone dir
+      shell: cat ~/test
+
+    - name: WHO root
+      command: whoami
+      become: true
+      become_method: su
+      

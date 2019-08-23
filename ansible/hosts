@@ -1,2 +1,2 @@
-[main]
-deb_on_vm ansible_host=127.0.0.1 ansible_user=ujyzene ansible_port=2222 ansible_ssh_private_key_file=/Users/roman/.ssh/id_rsa
+[VMS]
+vmhost_1 ansible_host=127.0.0.1
