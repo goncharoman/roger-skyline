@@ -1,17 +1,37 @@
 ---
-  - name: Test connection
+  - name: Mandatory part config
     hosts: VMS
-    
+    become: true
+    become_method: su
+
     tasks:
+    - name: Install packages
+      apt:
+        name: [sudo, ufw, fail2ban]
+        update_cache: true
+        force_apt_get: yes
 
-    - name: Ping
-      ping:
-
-    - name: Read file in /hone dir
-      shell: cat ~/test
-
-    - name: WHO root
-      command: whoami
-      become: true
-      become_method: su
+    - name: Change sudo rights
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: "^{{ ansible_user }}"
+        insertafter: "^root ALL=(ALL:ALL) ALL"
+        line: "{{ ansible_user }} ALL=(ALL:ALL) ALL"
+        validate: "/usr/sbin/visudo -cf %s"
       
+    - name: Set static IP
+      replace:
+        path: /etc/network/interfaces
+        regexp: "^allow-hotplug enp0s3"
+        replace: "auto enp0s3"
+        backup: yes
+
+    - name: Remove line from /etc/network/interfaces
+      replace:
+        path: /etc/network/interfaces
+        regexp: "^iface enp0s3"
+        replace: "iface enp0s3 inet static\n\taddress {{ item.addr }}\n\tnetmask 255.255.255.252\n\tgateway {{ item.gatewaty }}"
+        with_items:
+          addr: "192.168.20.249"
+          gateway: "192.168.20.1"
