@@ -16,10 +16,10 @@
         dest: /etc/sudoers
         state: present
         regexp: "^{{ ansible_user }}"
-        insertafter: "^root ALL=(ALL:ALL) ALL"
+        insertafter: "^# User privilege specification"
         line: "{{ ansible_user }} ALL=(ALL:ALL) ALL"
         validate: "/usr/sbin/visudo -cf %s"
-      
+
     - name: Set static IP
       replace:
         path: /etc/network/interfaces
@@ -30,8 +30,56 @@
     - name: Remove line from /etc/network/interfaces
       replace:
         path: /etc/network/interfaces
-        regexp: "^iface enp0s3"
-        replace: "iface enp0s3 inet static\n\taddress {{ item.addr }}\n\tnetmask 255.255.255.252\n\tgateway {{ item.gatewaty }}"
-        with_items:
-          addr: "192.168.20.249"
-          gateway: "192.168.20.1"
+        regexp: "^iface enp0s3 inet dhcp"
+        replace: "iface enp0s3 inet static\n\taddress {{ addr }}\n\tnetmask 255.255.255.252\n\tgateway {{ gateway }}"
+        backup: yes
+
+    - name: Copy ssh key
+      authorized_key:
+        user: "{{ ansible_user }}"
+        state: present
+        key: "{{ lookup('file', '{{ pubkey }}') }}"
+
+    - name: Change ssh port
+      replace:
+        path: /etc/ssh/sshd_config
+        regexp: "^#Port 22"
+        replace: "Port {{ sshpt }}"
+        backup: yes
+
+    - name: No login root
+      replace:
+        path: /etc/ssh/sshd_config
+        regexp: "^#PermitRootLogin prohibit-password"
+        replace: "PermitRootLogin no"
+        backup: yes
+
+    - name: No passwd auth
+      replace:
+        path: /etc/ssh/sshd_config
+        regexp: "^#PasswordAuthentication yes"
+        replace: "PasswordAuthentication no"
+        backup: yes
+
+    - name: Allow new ssh port
+      ufw:
+        rule: allow
+        port: '{{ sshpt }}'
+
+    - name: Allow default ssh port
+      ufw:
+        rule: allow
+        port: "22"
+
+    - name: Enable ufw on startup
+      replace:
+        path: /etc/ufw/ufw.conf
+        regexp: "^ENABLED=no"
+        replace: "ENABLED=yes"
+        backup: yes
+
+    - name: Add jail.local
+      copy:
+        src: files/jail.local
+        dest: /etc/fail2ban/jail.local
+
