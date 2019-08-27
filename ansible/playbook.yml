@@ -7,7 +7,7 @@
     tasks:
     - name: Install packages
       apt:
-        name: [sudo, ufw, fail2ban]
+        name: [sudo, ufw, fail2ban, portsentry, mailutils]
         update_cache: true
         force_apt_get: yes
 
@@ -31,7 +31,7 @@
       replace:
         path: /etc/network/interfaces
         regexp: "^iface enp0s3 inet dhcp"
-        replace: "iface enp0s3 inet static\n\taddress {{ addr }}\n\tnetmask 255.255.255.252\n\tgateway {{ gateway }}"
+        replace: "iface enp0s3 inet static\n\taddress {{ addr }}\n\tnetmask 255.255.255.0\n\tgateway {{ gateway }}"
         backup: yes
 
     - name: Copy ssh key
@@ -65,11 +65,7 @@
       ufw:
         rule: allow
         port: '{{ sshpt }}'
-
-    - name: Allow default ssh port
-      ufw:
-        rule: allow
-        port: "22"
+        proto: tcp
 
     - name: Enable ufw on startup
       replace:
@@ -83,3 +79,93 @@
         src: files/jail.local
         dest: /etc/fail2ban/jail.local
 
+    - name: Portsentry config (part 1)
+      replace:
+        path: /etc/portsentry/portsentry.conf
+        regexp: '^BLOCK_UDP="0"'
+        replace: 'BLOCK_UDP="1"'
+        backup: yes
+
+    - name: Portsentry config (part 2)
+      replace:
+        path: /etc/portsentry/portsentry.conf
+        regexp: '^BLOCK_TCP="0"'
+        replace: 'BLOCK_TCP="1"'
+        backup: yes
+
+    - name: Portsentry config (part 3)
+      replace:
+        path: /etc/portsentry/portsentry.conf
+        regexp: "^KILL_ROUTE"
+        replace: "#KILL_ROUTE"
+        backup: yes
+
+    - name: Portsentry config (part 4)
+      replace:
+        path: /etc/portsentry/portsentry.conf
+        after: "# iptables support for Linux"
+        before: "# iptables support for Linux with limit and LOG support."
+        regexp: '^#'
+        replace: ''
+        backup: yes
+
+    - name: Change portsentry mode
+      replace:
+        path: /etc/default/portsentry
+        regexp: '^TCP_MODE="tcp"\nUDP_MODE="udp"'
+        replace: 'TCP_MODE="atcp"\nUDP_MODE="audp"'
+        backup: yes
+
+    - name: Disable apt-daily.timer
+      systemd:
+        name: apt-daily.timer
+        enabled: no
+
+    - name: Disable apt-daily-upgrade.timer
+      systemd:
+        name: apt-daily-upgrade.timer
+        enabled: no
+
+    - name: Disable console-setup.service
+      systemd:
+        name: console-setup.service
+        enabled: no
+
+    - name: Disable keyboard-setup.service
+      systemd:
+        name: keyboard-setup.service
+        enabled: no
+
+    - name: Copy update-script.sh to /usr/local/bin/
+      copy:
+        src: files/update_script.sh
+        dest: /usr/local/bin/update_script
+        owner: root
+        group: root
+        mode: u=rwx,g=rx,o=r
+
+    - name: Add task to /etc/crontab (@reboot)
+      lineinfile:
+        dest: /etc/crontab
+        state: present
+        line: '@reboot root /usr/local/bin/update_script'
+
+    - name: Add task to /etc/crontab (every week at 4 AM)
+      lineinfile:
+        dest: /etc/crontab
+        state: present
+        line: "0 4 * * 1 root /usr/local/bin/update_script"
+
+    - name: Copy cronMonitor.sh to /usr/local/bin/
+      copy:
+        src: files/cronMonitor.sh
+        dest: /usr/local/bin/cronMonitor
+        owner: root
+        group: root
+        mode: u=rwx,g=rx,o=r
+
+    - name: Add monitor task to /etc/crontab
+      lineinfile:
+        dest: /etc/crontab
+        state: present
+        line: "0 0 * * * root /usr/local/bin/cronMonitor"
