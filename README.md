@@ -88,7 +88,7 @@
 	```
 6.
 	fail2ban
-	
+
 	installation
 	```
 	sudo apt-get install fail2ban
@@ -96,10 +96,10 @@
 	user settings are best stored in .local file (not .conf)
 	```
 	sudo vim /etc/fail2ban/jail.local
-	```  
+	```
 	```
 	#in jail.local
-	
+
 	[DEFAULT]
 	ignoreip = 127.0.0.1
 	bantime = 600
@@ -117,9 +117,50 @@
 	```
 	sudo service fail2ban restart
 	```
-	!notes
-	https://github.com/fail2ban/fail2ban/issues/1092
+7.
+	portsenty
+	```
+	sudo apt-get install portsentry
+	```
+	Config /etc/portsentry/portsentry.conf
+	```
+	BLOCK_UDP="1"
+	BLOCK_TCP="1"
 
+	# iptables support for Linux (uncomment this)
+	KILL_ROUTE="/sbin/iptables -I INPUT -s $TARGET$ -j DROP"
+	```
+	Change mode of portsentry
+	```
+	# /etc/default/portsentry
+	TCP_MODE="atcp"
+	UDP_MODE="audp"
+	```
+	or
+	```
+	portsentry -atcp
+	portsentry -audp
+	```
+8.
+	Disable services
+	```
+	sudo systenctl disable apt-daily.timer
+	sudo systenctl disable apt-daily-upgrade.timer
+	sudo systenctl disable console-setup.service
+	sudo systenctl disable keyboard-setup.service
+	```
+9.
+	Script - `/files/update_script.sh`
 
+	Add to /etc/crontab
+	```
+	@reboot root /usr/local/bin/update_scrip
+	0 4 * * 1 root /usr/local/bin/update_script
+	```
+10.
+	Script - `/files/cronMonitor.sh`
 
-	ansible vault passwd - q1234
+	Add to /etc/crontab
+	```
+	0 0 * * * root /usr/local/bin/cronMonitor
+	```
