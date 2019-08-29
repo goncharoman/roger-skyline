@@ -1,0 +1,21 @@
+[DEFAULT]
+ignoreip = 127.0.0.1
+bantime = 600
+
+[sshd]
+enabled = true
+port = 52121
+action = iptables[name=SSH, port=52121, protocol=tcp]
+filter = sshd
+logpath = %(sshd_log)s
+backend = %(sshd_backend)s
+maxretry = 3
+
+[http-get-dos]
+enabled = true
+port = http,https
+action = iptables[name=HTTP, port=http, protocol=tcp]
+filter = http-get-dos
+logpath = /var/log/apache2/access.log
+findtime = 300
+maxretry = 300

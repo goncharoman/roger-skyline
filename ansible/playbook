@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "ATTENTION:\nAdvanced settings in ./evars.yml\n"
+read -p "Username: " USERNAME
+ansible-playbook playbook.yml -k -K -c paramiko --user "$USERNAME"

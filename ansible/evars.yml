@@ -1,0 +1,8 @@
+---
+addr: 192.168.20.226
+netmask: 255.255.255.0
+gateway: 192.168.20.1
+sshpt: "52121"
+pubkey: /Users/roman/.ssh/id-roger.pub
+git_username: 'gonharoman'
+git_email: 'goncharoman@gmail.com'

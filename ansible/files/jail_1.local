@@ -4,7 +4,7 @@ bantime = 600
 
 [sshd]
 enabled = true
-port = 52121, ssh
+port = 52121
 action = iptables[name=SSH, port=52121, protocol=tcp]
 filter = sshd
 logpath = %(sshd_log)s
