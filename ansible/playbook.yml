@@ -7,6 +7,7 @@
     - ./evars.yml
 
     tasks:
+
     - name: Install packages
       apt:
         name: [sudo, ufw, fail2ban, portsentry, mailutils]
@@ -243,7 +244,7 @@
         pip:
           requirements: /var/www/app.local/requirements.txt
           virtualenv: /var/www/app.local/venv
-          virtualenv_python: python3.7
+          virtualenv_python: python3
 
       - name: Create log dir
         file:
