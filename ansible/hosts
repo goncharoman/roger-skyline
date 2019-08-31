@@ -1,2 +1,2 @@
 [VMS]
-vmhost_1 ansible_host=192.168.1.48
+vmhost_1 ansible_host=192.168.1.69

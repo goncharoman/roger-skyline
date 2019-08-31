@@ -1,6 +1,7 @@
 #!/bin/bash
 
-cd /var/www/app.local/
+cd /var/www/app.local/flaskapp
+git checkout . > /dev/null
 reply=$(/usr/bin/git pull)
 
 if [[ $reply != "Уже обновлено." ]]; then

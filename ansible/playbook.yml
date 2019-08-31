@@ -193,130 +193,140 @@
           src: files/jail_2.local
           dest: /etc/fail2ban/jail.local
 
-      - name: Install deb package
-        apt:
-          name: [apache2, python3, python-pip, python-setuptools, python3-setuptools, libapache2-mod-wsgi, git]
-          update_cache: true
-          force_apt_get: yes
+      # - name: Install deb package
+      #   apt:
+      #     name: [apache2, python3, python-pip, python-setuptools, python3-setuptools, libapache2-mod-wsgi, git]
+      #     update_cache: true
+      #     force_apt_get: yes
 
-      - name: Eanble mod_wsgi
-        command: /usr/sbin/a2enmod wsgi
+      # - name: Eanble mod_wsgi
+      #   command: /usr/sbin/a2enmod wsgi
 
-      - name: Enable ssl mod
-        command: /usr/sbin/a2enmod ssl
+      # - name: Enable ssl mod
+      #   command: /usr/sbin/a2enmod ssl
 
-      - name: Adduser webmaster
-        user:
-          name: webmaster
-          group: www-data
-          shell: /bin/false
-          create_home: False
+      # # - name: Adduser webmaster
+      # #   user:
+      # #     name: webmaster
+      # #     group: www-data
+      # #     shell: /bin/false
+      # #     create_home: False
 
-      - name: Install virtualenv
-        pip:
-          name: virtualenv
-          executable: pip
+      # - name: Install virtualenv
+      #   pip:
+      #     name: virtualenv
+      #     executable: pip
 
-      - name: Create /var/www/app.local
-        file:
-          path: /var/www/app.local
-          state: directory
-          owner: webmaster
-          group: www-data
-          mode: 0755
+      # - name: Create /var/www/app.local
+      #   file:
+      #     path: /var/www/app.local
+      #     state: directory
+      #     owner: "{{ ansible_user }}"
+      #     group: www-data
+      #     mode: 0755
 
-      - name: Git config
-        git_config:
-          name="{{ item.name }}"
-          scope=global
-          value="{{ item.value }}"
-        with_items:
-          - {name: "user.name",  value: "{{ git_username }}" }
-          - {name: "user.email", value: "{{ git_email }}" }
+      # - name: Git config
+      #   git_config:
+      #     name="{{ item.name }}"
+      #     scope=global
+      #     value="{{ item.value }}"
+      #   with_items:
+      #     - {name: "user.name",  value: "{{ git_username }}" }
+      #     - {name: "user.email", value: "{{ git_email }}" }
 
-      - name: Deploy project
-        git:
-          repo: "https://github.com/goncharoman/roger-flaskapp.git"
-          dest: /var/www/app.local/
-          clone: yes
+      # - name: Deploy project
+      #   git:
+      #     repo: "https://github.com/goncharoman/roger-flaskapp.git"
+      #     dest: /var/www/app.local/
+      #     clone: yes
 
-      - name: Set virtualenv
-        pip:
-          requirements: /var/www/app.local/requirements.txt
-          virtualenv: /var/www/app.local/venv
-          virtualenv_python: python3
+      # # - name: Set virtualenv
+      # #   pip:
+      # #     requirements: /var/www/app.local/requirements.txt
+      # #     virtualenv: /var/www/app.local/venv
+      # #     virtualenv_python: python3
 
-      - name: Create log dir
-        file:
-          path: /var/log/app.local/log
-          state: directory
-          owner: webmaster
-          group: www-data
-          mode: 0755
+      # # - name: Set virtualenv
+      # #   pip:
+      # #     name: "{{ item.name }}"
+      # #     virtualenv: /var/www/app.local/venv
+      # #     virtualenv_python: python3
+      # #   with_items:
+      # #     - {name: flask}
+      # #     - {name: flask-sqlalchemy}
+      # #     - {name: pusher}
 
-      - name: Change venv dir mode
-        file:
-          path: /var/www/app.local/venv
-          owner: webmaster
-          group: www-data
-          mode: 0755
+      # - name: Create log dir
+      #   file:
+      #     path: /var/log/app.local/log
+      #     state: directory
+      #     owner: "{{ ansible_user }}"
+      #     group: www-data
+      #     mode: 0755
 
-      - name: Create /var/www/site.lcoal
-        file:
-          path: /var/www/site.local
-          state: directory
-          owner: webmaster
-          group: www-data
-          mode: 0755
+      # # - name: Change venv dir mode
+      # #   file:
+      # #     path: /var/www/app.local/venv
+      # #     owner: webmaster
+      # #     group: www-data
+      # #     mode: 0755
 
-      - name: Add index.html to site.local
-        copy:
-          src: files/index.html
-          dest: /var/www/site.local/index.html
-          owner: webmaster
-          group: www-data
-          mode: 0755
+      # # - name: Create /var/www/site.lcoal
+      # #   file:
+      # #     path: /var/www/site.local
+      # #     state: directory
+      # #     owner: webmaster
+      # #     group: www-data
+      # #     mode: 0755
 
-      - name: Create openssl cert
-        command: /usr/bin/openssl req -x509 -newkey rsa -keyout /etc/ssl/private/server.pem -out /etc/ssl/certs/server.pem -nodes -days 365 -subj '/CN=roger-skyline'
+      # # - name: Add index.html to site.local
+      # #   copy:
+      # #     src: files/index.html
+      # #     dest: /var/www/site.local/index.html
+      # #     owner: webmaster
+      # #     group: www-data
+      # #     mode: 0755
 
-      - name: Disable 000-dafault.conf
-        command: /usr/sbin/a2dissite 000-default.conf
+      # - name: Create openssl cert
+      #   command: /usr/bin/openssl req -x509 -newkey rsa -keyout /etc/ssl/private/server.pem -out /etc/ssl/certs/server.pem -nodes -days 365 -subj '/CN=roger-skyline'
 
-      - name: Copy configs in sites-available
-        copy: src="{{ item.src }}" dest="{{ item.dest }}"
-        with_items:
-          - {src: "files/app.local.conf", dest: "/etc/apache2/sites-available/app.local.conf"}
-          - {src: "files/site.local.conf", dest: "/etc/apache2/sites-available/site.local.conf"}
+      # - name: Disable 000-dafault.conf
+      #   command: /usr/sbin/a2dissite 000-default.conf
 
-      - name: Enable configs
-        command: /usr/sbin/a2ensite "{{ item.site }}"
-        with_items:
-          - {site: "app.local.conf"}
-          - {site: "site.local.conf"}
+      # - name: Copy configs in sites-available
+      #   copy: src="{{ item.src }}" dest="{{ item.dest }}"
+      #   with_items:
+      #     - {src: "files/app.local.conf", dest: "/etc/apache2/sites-available/app.local.conf"}
+      #     # - {src: "files/site.local.conf", dest: "/etc/apache2/sites-available/site.local.conf"}
 
-      - name: Add site.local to /etc/hosts
-        lineinfile:
-          dest: /etc/hosts
-          state: present
-          line: "127.0.0.1 {{ item.dom }}"
-        with_items:
-            - {dom: "app.local"}
-            - {dom: "site.local"}
+      # - name: Enable configs
+      #   command: /usr/sbin/a2ensite "{{ item.site }}"
+      #   with_items:
+      #     - {site: "app.local.conf"}
+      #     # - {site: "site.local.conf"}
 
-      - name: Copy autodeploy script
-        copy:
-          src: files/deploy.sh
-          dest: /usr/local/bin/autodeploy
-          owner: root
-          group: root
-          mode: u=rwx,g=rx,o=r
+      # - name: Add site.local to /etc/hosts
+      #   lineinfile:
+      #     dest: /etc/hosts
+      #     state: present
+      #     line: "127.0.0.1 {{ item.dom }}"
+      #   with_items:
+      #       - {dom: "app.local"}
+      #       # - {dom: "site.local"}
 
-      - name: Add task in crontab
-        lineinfile:
-          dest: /etc/crontab
-          state: present
-          line: "{{ item.tab }} root /usr/local/bin/autodeploy"
-        with_items:
-          - {tab: "@reboot"}
-          - {tab: "*/10 * * * *"}
+      # - name: Copy autodeploy script
+      #   copy:
+      #     src: files/deploy.sh
+      #     dest: /usr/local/bin/autodeploy
+      #     owner: root
+      #     group: root
+      #     mode: u=rwx,g=rx,o=r
+
+      # - name: Add task in crontab
+      #   lineinfile:
+      #     dest: /etc/crontab
+      #     state: present
+      #     line: "{{ item.tab }} root /usr/local/bin/autodeploy"
+      #   with_items:
+      #     - {tab: "@reboot"}
+          # - {tab: "*/10 * * * *"}
